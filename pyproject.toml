@@ -1,0 +1,27 @@
+[project]
+name = "craigpy"
+version = "0.1.0"
+description = "Local codebase indexer with semantic search — ChromaDB + SQLite + MCP"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.1",
+    "chromadb>=1.0",
+    "pathspec>=0.12",
+    "mcp>=1.2",
+]
+
+[project.scripts]
+craigpy = "craigpy.cli.main:cli"
+craigpy-mcp = "craigpy.mcp.server:main"
+craigpy-inspect = "craigpy.cli.inspect:main"
+
+[build-system]
+requires = ["uv_build>=0.9.16,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+]
