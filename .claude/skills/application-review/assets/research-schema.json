@@ -1,0 +1,318 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "application-review-research-schema",
+  "title": "Application Review Research Schema",
+  "description": "Schema for intermediate research data collected during application review",
+  "type": "object",
+  "required": ["metadata", "dependencies", "integrations", "configuration", "deployment", "codeMetrics"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Basic application information",
+      "required": ["name", "languages", "frameworks"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Application name from package manifest or README"
+        },
+        "description": {
+          "type": "string",
+          "description": "Application description from README or manifest"
+        },
+        "version": {
+          "type": "string",
+          "description": "Current version if specified"
+        },
+        "languages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Primary programming languages detected"
+        },
+        "frameworks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Frameworks and major libraries (e.g., React, Spring Boot, Express)"
+        },
+        "packageManager": {
+          "type": "string",
+          "description": "Package manager used (npm, maven, gradle, pip, go mod, cargo)"
+        },
+        "repositoryUrl": {
+          "type": "string",
+          "description": "Repository URL if found"
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "Direct dependencies (top-level only, no transitive)",
+      "properties": {
+        "production": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "purpose": { "type": "string", "description": "Brief description of what this dependency is used for" }
+            }
+          }
+        },
+        "development": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version"],
+            "properties": {
+              "name": { "type": "string" },
+              "version": { "type": "string" },
+              "purpose": { "type": "string" }
+            }
+          }
+        },
+        "verification": {
+          "type": "object",
+          "description": "Output from verify-dependencies.sh script - file existence checks only",
+          "properties": {
+            "lockFiles": {
+              "type": "object",
+              "properties": {
+                "found": { "type": "boolean" },
+                "files": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "packageManager": {
+              "type": "object",
+              "properties": {
+                "type": { "type": ["string", "null"] },
+                "manifest": { "type": ["string", "null"] }
+              }
+            },
+            "securityConfig": {
+              "type": "object",
+              "properties": {
+                "dependabot": { "type": "boolean" },
+                "snyk": { "type": "boolean" },
+                "renovate": { "type": "boolean" },
+                "codeowners": { "type": "boolean" },
+                "securityPolicy": { "type": "boolean" }
+              }
+            },
+            "cicd": {
+              "type": "object",
+              "properties": {
+                "githubActions": { "type": "boolean" },
+                "gitlabCi": { "type": "boolean" },
+                "jenkins": { "type": "boolean" },
+                "azurePipelines": { "type": "boolean" },
+                "circleci": { "type": "boolean" }
+              }
+            },
+            "containerization": {
+              "type": "object",
+              "properties": {
+                "dockerfile": { "type": "boolean" },
+                "dockerCompose": { "type": "boolean" },
+                "kubernetes": { "type": "boolean" },
+                "helm": { "type": "boolean" }
+              }
+            },
+            "documentation": {
+              "type": "object",
+              "properties": {
+                "readme": { "type": "boolean" },
+                "contributing": { "type": "boolean" },
+                "changelog": { "type": "boolean" },
+                "adr": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "description": "External systems and services the application interacts with",
+      "properties": {
+        "databases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "description": "Database type (PostgreSQL, MongoDB, Redis, etc.)" },
+              "evidence": { "type": "string", "description": "File/config where this was detected" }
+            }
+          }
+        },
+        "apis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "API or service name" },
+              "type": { "type": "string", "enum": ["REST", "GraphQL", "gRPC", "SOAP", "WebSocket", "unknown"] },
+              "direction": { "type": "string", "enum": ["inbound", "outbound", "both"] },
+              "evidence": { "type": "string" }
+            }
+          }
+        },
+        "messaging": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "description": "Kafka, RabbitMQ, SQS, etc." },
+              "topics": { "type": "array", "items": { "type": "string" } },
+              "evidence": { "type": "string" }
+            }
+          }
+        },
+        "externalServices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Service name (Auth0, Stripe, AWS S3, etc.)" },
+              "purpose": { "type": "string" },
+              "evidence": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "description": "Configuration management approach",
+      "properties": {
+        "configFiles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of configuration file paths"
+        },
+        "environmentVariables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "sensitive": { "type": "boolean", "description": "Appears to be a secret/credential" }
+            }
+          }
+        },
+        "secretsManagement": {
+          "type": "string",
+          "description": "How secrets are managed (env vars, vault, k8s secrets, etc.)"
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "description": "Deployment and infrastructure configuration",
+      "properties": {
+        "containerization": {
+          "type": "object",
+          "properties": {
+            "hasDockerfile": { "type": "boolean" },
+            "baseImage": { "type": "string" },
+            "hasCompose": { "type": "boolean" },
+            "composeServices": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "orchestration": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "description": "kubernetes, ecs, nomad, none, etc." },
+            "manifests": { "type": "array", "items": { "type": "string" } },
+            "helmCharts": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "cicd": {
+          "type": "object",
+          "properties": {
+            "platform": { "type": "string", "description": "GitHub Actions, GitLab CI, Jenkins, etc." },
+            "workflows": { "type": "array", "items": { "type": "string" } },
+            "stages": { "type": "array", "items": { "type": "string" }, "description": "Build, test, deploy stages detected" }
+          }
+        },
+        "infrastructure": {
+          "type": "object",
+          "properties": {
+            "hasIaC": { "type": "boolean" },
+            "iacTool": { "type": "string", "description": "Terraform, Pulumi, CloudFormation, etc." },
+            "cloudProvider": { "type": "string" },
+            "resources": { "type": "array", "items": { "type": "string" }, "description": "Key resources defined" }
+          }
+        }
+      }
+    },
+    "testing": {
+      "type": "object",
+      "description": "Testing setup and practices",
+      "properties": {
+        "frameworks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Test frameworks used (Jest, JUnit, pytest, etc.)"
+        },
+        "hasUnitTests": { "type": "boolean" },
+        "hasIntegrationTests": { "type": "boolean" },
+        "hasE2eTests": { "type": "boolean" },
+        "coverageConfig": { "type": "boolean", "description": "Coverage reporting configured" },
+        "testDirectories": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "codeMetrics": {
+      "type": "object",
+      "description": "Basic code metrics",
+      "required": ["totalFiles", "directoryStructure"],
+      "properties": {
+        "totalFiles": { "type": "integer" },
+        "totalDirectories": { "type": "integer" },
+        "linesByLanguage": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" },
+          "description": "Approximate lines of code by language"
+        },
+        "directoryStructure": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Top-level directory names"
+        }
+      }
+    },
+    "documentation": {
+      "type": "object",
+      "description": "Documentation artifacts found",
+      "properties": {
+        "hasReadme": { "type": "boolean" },
+        "hasContributing": { "type": "boolean" },
+        "hasChangelog": { "type": "boolean" },
+        "hasApiDocs": { "type": "boolean" },
+        "additionalDocs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "adrs": {
+      "type": "object",
+      "description": "Architecture Decision Records if found",
+      "properties": {
+        "found": { "type": "boolean" },
+        "location": { "type": "string" },
+        "count": { "type": "integer" },
+        "titles": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "securityIndicators": {
+      "type": "object",
+      "description": "Security-related observations",
+      "properties": {
+        "hasSecurityPolicy": { "type": "boolean" },
+        "hasDependabotConfig": { "type": "boolean" },
+        "hasCodeowners": { "type": "boolean" },
+        "authMechanism": { "type": "string", "description": "Authentication approach if detectable" },
+        "sensitiveDataHandling": { "type": "array", "items": { "type": "string" }, "description": "Observations about PII, encryption, etc." }
+      }
+    }
+  }
+}

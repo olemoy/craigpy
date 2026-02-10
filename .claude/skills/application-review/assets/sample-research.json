@@ -1,0 +1,119 @@
+{
+  "metadata": {
+    "name": "example-web-app",
+    "description": "A sample e-commerce web application for demonstration purposes",
+    "version": "2.1.0",
+    "languages": ["TypeScript", "JavaScript"],
+    "frameworks": ["React", "Express", "Prisma"],
+    "packageManager": "npm",
+    "repositoryUrl": "https://github.com/example/web-app"
+  },
+  "dependencies": {
+    "production": [
+      { "name": "react", "version": "^18.2.0", "purpose": "UI framework" },
+      { "name": "express", "version": "^4.18.0", "purpose": "HTTP server" },
+      { "name": "@prisma/client", "version": "^5.0.0", "purpose": "Database ORM" },
+      { "name": "stripe", "version": "^12.0.0", "purpose": "Payment processing" },
+      { "name": "jsonwebtoken", "version": "^9.0.0", "purpose": "JWT authentication" },
+      { "name": "ioredis", "version": "^5.3.0", "purpose": "Redis client for caching" }
+    ],
+    "development": [
+      { "name": "typescript", "version": "^5.0.0", "purpose": "Type checking" },
+      { "name": "jest", "version": "^29.0.0", "purpose": "Unit testing" },
+      { "name": "eslint", "version": "^8.0.0", "purpose": "Linting" }
+    ]
+  },
+  "integrations": {
+    "databases": [
+      { "type": "PostgreSQL", "evidence": "docker-compose.yml, prisma/schema.prisma" },
+      { "type": "Redis", "evidence": "docker-compose.yml, src/cache/redis.ts" }
+    ],
+    "apis": [
+      { "name": "REST API", "type": "REST", "direction": "inbound", "evidence": "src/routes/" },
+      { "name": "Stripe API", "type": "REST", "direction": "outbound", "evidence": "src/payments/stripe.ts" }
+    ],
+    "messaging": [],
+    "externalServices": [
+      { "name": "Stripe", "purpose": "Payment processing", "evidence": "package.json, src/payments/" },
+      { "name": "SendGrid", "purpose": "Email delivery", "evidence": "src/notifications/email.ts" }
+    ]
+  },
+  "configuration": {
+    "configFiles": [".env.example", "config/default.json", "config/production.json"],
+    "environmentVariables": [
+      { "name": "DATABASE_URL", "description": "PostgreSQL connection string", "sensitive": true },
+      { "name": "REDIS_URL", "description": "Redis connection string", "sensitive": true },
+      { "name": "STRIPE_SECRET_KEY", "description": "Stripe API key", "sensitive": true },
+      { "name": "JWT_SECRET", "description": "JWT signing secret", "sensitive": true },
+      { "name": "PORT", "description": "Server port", "sensitive": false }
+    ],
+    "secretsManagement": "Environment variables via .env files"
+  },
+  "deployment": {
+    "containerization": {
+      "hasDockerfile": true,
+      "baseImage": "node:20-alpine",
+      "hasCompose": true,
+      "composeServices": ["app", "postgres", "redis"]
+    },
+    "orchestration": {
+      "type": "kubernetes",
+      "manifests": ["k8s/deployment.yaml", "k8s/service.yaml", "k8s/ingress.yaml"],
+      "helmCharts": []
+    },
+    "cicd": {
+      "platform": "GitHub Actions",
+      "workflows": [".github/workflows/ci.yml", ".github/workflows/deploy.yml"],
+      "stages": ["lint", "test", "build", "docker-build", "deploy-staging", "deploy-production"]
+    },
+    "infrastructure": {
+      "hasIaC": true,
+      "iacTool": "Terraform",
+      "cloudProvider": "AWS",
+      "resources": ["EKS cluster", "RDS PostgreSQL", "ElastiCache Redis", "ALB"]
+    }
+  },
+  "testing": {
+    "frameworks": ["Jest", "Supertest"],
+    "hasUnitTests": true,
+    "hasIntegrationTests": true,
+    "hasE2eTests": false,
+    "coverageConfig": true,
+    "testDirectories": ["src/__tests__/", "tests/integration/"]
+  },
+  "codeMetrics": {
+    "totalFiles": 147,
+    "totalDirectories": 23,
+    "linesByLanguage": {
+      "TypeScript": 8500,
+      "JavaScript": 200,
+      "JSON": 450,
+      "YAML": 380
+    },
+    "directoryStructure": ["src", "tests", "config", "k8s", "terraform", "docs", "scripts"]
+  },
+  "documentation": {
+    "hasReadme": true,
+    "hasContributing": true,
+    "hasChangelog": true,
+    "hasApiDocs": false,
+    "additionalDocs": ["docs/architecture.md", "docs/deployment.md"]
+  },
+  "adrs": {
+    "found": true,
+    "location": "docs/adr/",
+    "count": 3,
+    "titles": [
+      "0001-use-postgresql-for-persistence.md",
+      "0002-jwt-authentication.md",
+      "0003-event-driven-notifications.md"
+    ]
+  },
+  "securityIndicators": {
+    "hasSecurityPolicy": false,
+    "hasDependabotConfig": true,
+    "hasCodeowners": true,
+    "authMechanism": "JWT with refresh tokens",
+    "sensitiveDataHandling": ["PII stored in PostgreSQL", "Passwords hashed with bcrypt"]
+  }
+}
